@@ -57,21 +57,30 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.discount = discount
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
+        #mapping from states to their qvalue
         self.runValueIteration()
 
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
         startState = self.mdp.getStartState()
-        startActions = self.mdp.getPossibleActions(startState)
-        currState = startState
-
+        possible_actions = self.mdp.getPossibleActions(startState)
+    
+        
         for i in range(self.iterations):
-            bestAction = self.computeActionFromValues(currState)
-            # print(bestAction)
-            # print("AOIEFJHWOEFHNWOEFIH", self.computeQValueFromValues(currState, bestAction))
-            self.values[currState] = self.computeQvaluesFromValues(currState, bestAction)
-            
+            for state in self.mdp.getStates():
+                currState = state
+                maxQValue = float('-inf')
+                # bestAction = self.computeActionFromValues(currState)
+                # print(bestAction)
+                # print("AOIEFJHWOEFHNWOEFIH", self.computeQValueFromValues(currState, bestAction))
+                # self.values[currState] = self.computeQvaluesFromValues(currState, bestAction)
+                for action in possible_actions:
+                    maxQValue = max(maxQValue, self.getQValue(currState, action))
+            self.values[currState] = maxQValue
+            #update state
+                
+                
             
 
 
@@ -132,16 +141,28 @@ class ValueIterationAgent(ValueEstimationAgent):
         # nextStates = mdp.getPossibleActions(state)
         # return .getValue(state)
         #keeps track of most recent value
-        startActions = self.mdp.getPossibleActions(state)
+        # startActions = self.mdp.getPossibleActions(state)
+        # best_action = None
+        # qValue = -1000
+        # for action in startActions:
+        #     currQValue = self.computeQValueFromValues(state, action)
+        #     if (qValue < currQValue):
+        #         qValue = currQValue
+        #         best_action = action
+        # # print("computeaction total", qValue, best_action)
+        # return best_action
+        possible_actions = self.mdp.getPossibleActions(state)
+        if len(possible_actions) == 0:
+            return None
+        # maxQValue = self.getValue(state)
         best_action = None
-        qValue = -1000
-        for action in startActions:
-            currQValue = self.computeQValueFromValues(state, action)
-            if (qValue < currQValue):
-                qValue = currQValue
+        qValue = float('-inf')
+        for action in possible_actions:
+            if self.getQValue(state, action) > qValue:
+                qValue = self.getQValue(state, action)
                 best_action = action
-        # print("computeaction total", qValue, best_action)
-        return best_action
+        return action
+
         
 
 
