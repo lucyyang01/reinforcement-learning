@@ -62,16 +62,17 @@ class ValueIterationAgent(ValueEstimationAgent):
     def runValueIteration(self):
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-        #start with v0s = 0
-        #given vector of vks values, do a step of expectimax from each state
-        #repeat until convergence for v*
-        startState = mdp.getStartState()
-        startActions = mdp.getPossibleActions(startState)
+        startState = self.mdp.getStartState()
+        startActions = self.mdp.getPossibleActions(startState)
         currState = startState
-        for i in range(self.iterations):
-            reachable_states = mdp.getTransitionStatesAndProbs(currState)
-            
 
+        for i in range(self.iterations):
+            bestAction = self.computeActionFromValues(currState)
+            # print(bestAction)
+            # print("AOIEFJHWOEFHNWOEFIH", self.computeQValueFromValues(currState, bestAction))
+            self.values[currState] = self.computeQvaluesFromValues(currState, bestAction)
+            
+            
 
 
 
@@ -79,7 +80,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
           Return the value of the state (computed in __init__).
         """
-        #self.values : state -> value
+        #self.values : state -> valeu
         return self.values[state]
 
     
@@ -93,6 +94,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
             # mdp.getStates()
+            
             #   mdp.getPossibleActions(state)
             #   mdp.getTransitionStatesAndProbs(state, action)
             #   mdp.getReward(state, action, nextState)
@@ -101,12 +103,18 @@ class ValueIterationAgent(ValueEstimationAgent):
         
         #map a state t        if mdp.isTerminalState(state):
         total = 0
-        if mdp.isTerminalState(state):
-          return total
-        for item in mdp.getTransitionStatesAndProbs(state, action):
+        if self.mdp.isTerminal(state):
+            print("TERMINAL OEFNJWOFIGJWOGIJ")
+            return total
+        for item in self.mdp.getTransitionStatesAndProbs(state, action):
             nextState, probability = item[0], item[1]
-            total += probability * (mdp.getReward(state, action,nextState) + self.discount*mdp.getValue(nextState))
+            total += probability * (self.mdp.getReward(state, action,nextState) + self.discount*self.getValue(nextState))
         return total
+        #sum over all transition
+        # nextState, probability = mdp.getTransitionStatesAndProbs[0]
+        # qValue = probability*(mdp.getReward(state, action,nextState)+ self.discount*mdp.getValue(nextState))
+        #max over q values -> v k + 1
+
     
     
     def computeActionFromValues(self, state):
@@ -119,17 +127,30 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        if mdp.isTerminalState(state):
-            return None
-        nextStates = mdp.getPossibleActions(state)
-        return .getValue(state)
+        # if mdp.isTerminalState(state):
+        #     return None
+        # nextStates = mdp.getPossibleActions(state)
+        # return .getValue(state)
+        #keeps track of most recent value
+        startActions = self.mdp.getPossibleActions(state)
+        best_action = None
+        qValue = -1000
+        for action in startActions:
+            currQValue = self.computeQValueFromValues(state, action)
+            if (qValue < currQValue):
+                qValue = currQValue
+                best_action = action
+        # print("computeaction total", qValue, best_action)
+        return best_action
+        
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
 
     def getAction(self, state):
         "Returns the policy at the state (no exploration)."
-        return self.computeActionFromValues(state)
+        return self.computeActionFromValues(state)[0]
 
     def getQValue(self, state, action):
         return self.computeQValueFromValues(state, action)
