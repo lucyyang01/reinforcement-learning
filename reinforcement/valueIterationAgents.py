@@ -185,7 +185,63 @@ class PrioritizedSweepingValueIterationAgent(ValueIterationAgent):
         """
         self.theta = theta
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
+        # mdp = self.mdp
+        # values = self.values
+        # discount = self.discount
+        # iterations = self.iterations
+        # theta = self.theta
+        # states = mdp.getStates()
+        
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        mdp = self.mdp
+        values = self.values
+        discount = self.discount
+        iterations = self.iterations
+        theta = self.theta
+        states = mdp.getStates()
+        parents = {}
+        priorityQueue = util.PriorityQueue()
+        for state in states:
+            parents[state] = set()
+        for state in states:
+            q_vals = util.Counter()
+            possible_actions = mdp.getPossibleActions(state)
+            for action in possible_actions:
+                Transitions = mdp.getTransitionStatesAndProbs(state, action)
+                for (nextState, prob) in Transitions:
+                    if prob != 0:
+                        parents[nextState].add(state)
 
+                q_vals[action] = self.computeQValueFromValues(state, action)
+
+            if not mdp.isTerminal(state):
+                maxQValue_s = q_vals[q_vals.argMax()]
+                difference = abs(values[state] - maxQValue_s)
+                #has to update the priority queue
+                priorityQueue.update(state, - difference)
+
+            for i in range(iterations):
+                if priorityQueue.isEmpty():
+                    return
+                #getting the top item
+                state = priorityQueue.pop()
+
+                if not mdp.isTerminal(state):
+                    q_vals = util.Counter()
+                    for action in possible_actions:
+                        q_vals[action] = self.computeActionFromValues(state,action)
+                    #updating
+                    values[state] = q_vals[q_vals.argMax()]
+                for parent_val in parents[state]:
+                    qp_vals = util.Counter()
+                    possible_parActions = mdp.getPossibleActions(parent_val)
+                    for action in possible_parActions:
+                        qp_vals[action] = self.computeActionFromValues(parent_val, action)
+
+                    maxQValue_parent = qp_vals[qp_vals.argMax()]
+                    difference = abs(values[parent_val] - maxQValue_parent)
+
+                    if(difference > theta):
+                        priorityQueue.update(parent_val, - difference) 
