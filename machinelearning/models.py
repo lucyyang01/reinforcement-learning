@@ -119,10 +119,10 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         for x,y in dataset.iterate_forever(self.batch_size):
-            loss_as_scalar = self.get_loss(x,y)
+            loss = self.get_loss(x,y)
             
-            if loss_as_scalar >0.02:
-                gradient_w1, gradient_b1, gradient_w2, gradient_b2 = nn.gradients(loss_as_scalar, [self.weights1, self.weights2, self.bias1, self.bias2])
+            if nn.as_scalar(loss) >0.02:
+                gradient_w1, gradient_w2, gradient_b1, gradient_b2 = nn.gradients(loss, [self.weights1, self.weights2, self.bias1, self.bias2])
                 self.weights1.update(gradient_w1, -self.learning_rate)
                 self.bias1.update(gradient_b1, -self.learning_rate)
 
